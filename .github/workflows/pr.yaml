@@ -1,9 +1,10 @@
 name: Test and build
 
 on:
+  pull_request:
   push:
-    branches:
-      - !master
+    branches-ignore:
+      - master
 
 env:
   CI: true
