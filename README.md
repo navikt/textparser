@@ -1,9 +1,60 @@
-# Textparser
+# Textparser - Simple regex-based parser
 
-Simple regex-rule-based parser, see [rules](./rules.ts)
+Parses text into an AST given a set of regex-based rules. 
 
-## Sample
+## Usage
+```typescript
+import React from 'react';
+import { parse, build, AST, ParagraphRule, LinebreakRule, LinkRule } from '@navikt/textparser'
 
+const rules = [ParagraphRule, LinebreakRule, LinkRule];
+const textFromUser : string = '...';
+const ast : AST = parse(textFromUser, rules);
+
+const reactOutput : React.ReactElement<{}> = build(ast, rules);
+``` 
+
+## Creating your own rule
+Rules are split into two group; block-rules and inline-rules. 
+Block-rules are useful when working with structures spanning multiple lines, e.g paragraphs, lists, tables etc.
+Whereas inline-rules are useful can be used to implement bold, italics, linking etc. Take a look at [the predefined rules](src/rules.ts) for more inspiration.
+
+```typescript
+type Rule = {
+    name: string;
+    scope: RuleScope;
+    regex: RegExp;
+    parse(match: RegexMatch): ASTNode;
+    react(node: ASTNode): ReactElementDescription;
+}
+
+const atRule = {
+  name: 'atRule',
+  scope: RuleScope.INLINE,
+  regex: /\s?@(\w+)/,
+  parse(match): ASTNode {
+    return { name: 'atRule', content: [match.capture[0]] }
+  },
+  react(node: ASTNode): ReactElementDescription {
+    return { type: 'a', props: { href: `https://url.com?user=${Utils.getText(node)}` } }
+  }
+};
+```
+
+## Customizing existing rule
+```typescript
+import * as Utils from '@navikt/textparser';
+import { Link } from 'react-router';
+ 
+const customLinkRule: Rule = {
+    ...LinkRule,
+    react(node: string | { name: string; content: AST }): ReactElementDescription {
+        return {type: Link, props: {className: 'paragraph-class', to: Utils.getText(node) }}
+    }
+};
+``` 
+
+## AST showcase
 **INPUT**
 
 ```
@@ -24,7 +75,6 @@ spans multiple lines.
 ```
 
 **OUTPUT**
-
 ```
 [
   {
