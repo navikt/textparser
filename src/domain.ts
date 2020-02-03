@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode, ComponentType } from 'react';
 
 export type ASTNode =
     | string
@@ -19,14 +19,14 @@ export type Rule = {
     scope: RuleScope;
     regex: RegExp;
     parse(match: RegexMatch): ASTNode;
-    react(node: ASTNode): ReactElementDescription;
+    react(node: ASTNode, ast: AST): ReactElementDescription;
     [key: string]: any;
 };
 
 export interface ReactElementDescription {
-    type: string | React.ComponentType<any>;
+    type: string | ComponentType<any>;
     props?: { [key: string]: any };
-    children?: Array<React.ReactNode>;
+    children?: Array<ReactNode>;
 }
 
 export type RegexMatch = {

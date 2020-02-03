@@ -2,8 +2,8 @@ name: Test and build
 
 on:
   push:
-    branches:
-      - !master
+    branches-ignore:
+      - master
 
 env:
   CI: true

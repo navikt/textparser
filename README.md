@@ -25,7 +25,7 @@ type Rule = {
     scope: RuleScope;
     regex: RegExp;
     parse(match: RegexMatch): ASTNode;
-    react(node: ASTNode): ReactElementDescription;
+    react(node: ASTNode, ast: AST): ReactElementDescription;
 }
 
 const atRule = {
@@ -35,7 +35,7 @@ const atRule = {
   parse(match): ASTNode {
     return { name: 'atRule', content: [match.capture[0]] }
   },
-  react(node: ASTNode): ReactElementDescription {
+  react(node: ASTNode, ast: AST): ReactElementDescription {
     return { type: 'a', props: { href: `https://url.com?user=${Utils.getText(node)}` } }
   }
 };
@@ -48,7 +48,7 @@ import { Link } from 'react-router';
  
 const customLinkRule: Rule = {
     ...LinkRule,
-    react(node: string | { name: string; content: AST }): ReactElementDescription {
+    react(node: ASTNode, ast: AST): ReactElementDescription {
         return {type: Link, props: {className: 'paragraph-class', to: Utils.getText(node) }}
     }
 };
