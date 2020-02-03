@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "es5",
+    "module": "commonjs",
+    "lib": ["ES5"],
+    "strict": true,
+    "sourceMap": true,
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "declarationDir": "./dist",
+    "outDir": "./dist/",
+    "jsx": "react",
+    "typeRoots": ["node_modules/@types"]
+  },
+  "include": [
+    "src"
+  ]
+}
