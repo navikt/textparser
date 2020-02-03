@@ -19,7 +19,7 @@ export type Rule = {
     scope: RuleScope;
     regex: RegExp;
     parse(match: RegexMatch): ASTNode;
-    react(node: ASTNode): ReactElementDescription;
+    react(node: ASTNode, ast: AST): ReactElementDescription;
     [key: string]: any;
 };
 

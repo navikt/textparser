@@ -80,16 +80,16 @@ function simplify(node: ASTNode): Array<ASTNode> {
     }
 }
 
-function internalBuild(ruleMap: { [name: string]: Rule }, node: ASTNode, key: number): React.ReactNode {
+function internalBuild(ast: AST, ruleMap: { [name: string]: Rule }, node: ASTNode, key: number): React.ReactNode {
     if (typeof node === 'string') {
         return node;
     }
     const type = ruleMap[node.name];
-    const element = type.react(node);
+    const element = type.react(node, ast);
     const children =
         element.children?.length === 0 || node.content.length === 0
             ? undefined
-            : element.children || node.content.map((child, i) => internalBuild(ruleMap, child, i));
+            : element.children || node.content.map((child, i) => internalBuild(ast, ruleMap, child, i));
     return createElement(element.type, {...element.props, key}, children);
 }
 
@@ -112,6 +112,6 @@ export function parse(content: string, rules: Array<Rule>): AST {
 
 export function build(ast: AST, rules: Array<Rule>): ReactElement<{}> {
     const ruleMap = rules.reduce((acc, rule) => ({...acc, [rule.name]: rule}), {});
-    const nodes = ast.map((node, i) => internalBuild(ruleMap, node, i));
+    const nodes = ast.map((node, i) => internalBuild(ast, ruleMap, node, i));
     return createElement(Fragment, {}, nodes);
 }

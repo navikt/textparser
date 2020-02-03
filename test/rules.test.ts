@@ -26,7 +26,7 @@ describe('rules', () => {
                 name: 'Linebreak',
                 content: []
             });
-            expect(LinebreakRule.react('')).toEqual({
+            expect(LinebreakRule.react('', [])).toEqual({
                 type: 'br'
             });
         });
@@ -46,7 +46,7 @@ describe('rules', () => {
                 name: 'Paragraph',
                 content: ['Content here']
             });
-            expect(ParagraphRule.react('')).toEqual({
+            expect(ParagraphRule.react('', [])).toEqual({
                 type: 'p'
             });
         });
@@ -80,7 +80,7 @@ describe('rules', () => {
                 name: 'Highlight',
                 content: ['Content here']
             });
-            expect(HighlightRule.react('')).toEqual({
+            expect(HighlightRule.react('', [])).toEqual({
                 type: 'em'
             });
         });
@@ -112,7 +112,7 @@ describe('rules', () => {
                 name: 'DynamicHighlight',
                 content: ['Content here']
             });
-            expect(rule.react('')).toEqual({
+            expect(rule.react('', [])).toEqual({
                 type: 'em'
             });
         });
@@ -142,7 +142,7 @@ describe('rules', () => {
                 name: 'Bold',
                 content: ['Content here']
             });
-            expect(BoldRule.react('')).toEqual({
+            expect(BoldRule.react('', [])).toEqual({
                 type: 'b'
             });
         });
@@ -173,7 +173,7 @@ describe('rules', () => {
                 name: 'Link',
                 content: ['Content here']
             });
-            expect(LinkRule.react({name: 'Link', content: ['url.com']})).toEqual({
+            expect(LinkRule.react({name: 'Link', content: ['url.com']}, [])).toEqual({
                 type: 'a',
                 props: {target: '_blank', rel: 'noopener', href: 'https://url.com'}
             });
@@ -188,7 +188,7 @@ describe('rules', () => {
                     '.com'
                 ]
             };
-            expect(LinkRule.react(astnode)).toMatchObject({
+            expect(LinkRule.react(astnode, [])).toMatchObject({
                 type: 'a',
                 props: {
                     href: 'https://www.domain.com',
@@ -208,7 +208,7 @@ describe('rules', () => {
                     '.com'
                 ]
             };
-            expect(LinkRule.react(astnode)).toMatchObject({
+            expect(LinkRule.react(astnode, [])).toMatchObject({
                 type: 'a',
                 props: {
                     href: 'http://www.domain.com',
