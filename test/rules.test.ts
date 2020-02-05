@@ -1,7 +1,7 @@
 import {
     ASTNode,
     BoldRule,
-    createDynamicHighligtingRule,
+    createDynamicHighlightingRule,
     HighlightRule,
     LinebreakRule,
     LinkRule,
@@ -105,7 +105,7 @@ describe('rules', () => {
 
     describe('dynamicHighlight', () => {
         it('should have basic config', () => {
-            const rule = createDynamicHighligtingRule([]);
+            const rule = createDynamicHighlightingRule([]);
             expect(rule.name).toBe('DynamicHighlight');
             expect(rule.scope).toBe(RuleScope.INLINE);
             expect(rule.parse({...matched, capture: ['Content here']})).toEqual({
@@ -123,11 +123,11 @@ describe('rules', () => {
                 .split('')
                 .map((token) => `\\${token}`)
                 .join('');
-            expect(createDynamicHighligtingRule([scaryTokenlist]).regex.toString()).toContain(safeTokenlist);
+            expect(createDynamicHighlightingRule([scaryTokenlist]).regex.toString()).toContain(safeTokenlist);
         });
 
         it('it should use word-boundries to highlight', () => {
-            expect(match(createDynamicHighligtingRule(['ll']).regex, 'good hello world')).toMatchObject({
+            expect(match(createDynamicHighlightingRule(['ll']).regex, 'good hello world')).toMatchObject({
                 fullmatch: 'hello',
                 capture: ['hello']
             });

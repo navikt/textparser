@@ -56,7 +56,7 @@ function escapeRegExp(text: string): string {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
 
-export function createDynamicHighligtingRule(query: string[]): Rule {
+export function createDynamicHighlightingRule(query: string[]): Rule {
     const queryPattern = query
         .filter(word => word.length > 0)
         .map(escapeRegExp)
