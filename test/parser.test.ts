@@ -7,6 +7,7 @@ import {
     LinebreakRule,
     LinkRule,
     ParagraphRule,
+    BulletRule,
     parse,
     ReactElementDescription,
     Rule
@@ -20,6 +21,12 @@ Follow these simple steps:
 - send _*data*_
 - *wait* for the reply
 
+And these:
+
+* goto webpage: www.url.no/registry
+* send _*data*_
+* *wait* for the reply
+
 Best regards
 Your name
 Your office
@@ -30,7 +37,7 @@ This is the first paragraph
 This is the second paragraph
 `.trim()
 
-const rules: Array<Rule> = [HighlightRule, BoldRule, LinkRule, LinebreakRule, ParagraphRule];
+const rules: Array<Rule> = [HighlightRule, BoldRule, LinkRule, LinebreakRule, BulletRule, ParagraphRule];
 const whitespace = /\s/g;
 
 describe('textparser - parse', () => {
@@ -52,6 +59,33 @@ describe('textparser - parse', () => {
                     '- ',
                     {name: 'Highlight', content: ['wait']},
                     ' for the reply'
+                ]
+            },
+            {
+                name: 'Paragraph',
+                content: ['And these:']
+            },
+            {
+                name: 'Bullets',
+                content: [
+                    {
+                        name: 'Bullets__element', content: [
+                            'goto webpage: ',
+                            {name: 'Link', content: ['www.url.no/registry']}
+                        ]
+                    },
+                    {
+                        name: 'Bullets__element', content: [
+                            'send ',
+                            {name: 'Bold', content: [{name: 'Highlight', content: ['data']}]}
+                        ]
+                    },
+                    {
+                        name: 'Bullets__element', content: [
+                            {name: 'Highlight', content: ['wait']},
+                            ' for the reply'
+                        ]
+                    }
                 ]
             },
             {
@@ -101,6 +135,12 @@ describe('textparser - build', () => {
                 - send <b><em>data</em></b><br/>
                 - <em>wait</em> for the reply
             </p>
+            <p>And these:</p>
+            <ul>
+                <li>goto webpage: <a href="https://www.url.no/registry" target="_blank" rel="noopener">www.url.no/registry</a></li>            
+                <li>send <b><em>data</em></b></li>            
+                <li><em>wait</em> for the reply</li>            
+            </ul>
             <p>Best regards<br/>
                 Your name<br/>
                 Your office
@@ -117,7 +157,7 @@ describe('textparser - build', () => {
                 return {type: 'p', props: {className: 'paragraph-class'}}
             }
         };
-        const customRules = [HighlightRule, BoldRule, LinkRule, LinebreakRule, customParagraphRule];
+        const customRules = [HighlightRule, BoldRule, LinkRule, LinebreakRule, BulletRule, customParagraphRule];
 
         const reactnodes = build(parse(example, customRules), customRules);
         const markup = renderToStaticMarkup(reactnodes);
@@ -128,6 +168,12 @@ describe('textparser - build', () => {
                 - send <b><em>data</em></b><br/>
                 - <em>wait</em> for the reply
             </p>
+            <p class="paragraph-class">And these:</p>
+            <ul>
+                <li>goto webpage: <a href="https://www.url.no/registry" target="_blank" rel="noopener">www.url.no/registry</a></li>            
+                <li>send <b><em>data</em></b></li>            
+                <li><em>wait</em> for the reply</li>            
+            </ul>
             <p class="paragraph-class">Best regards<br/>
                 Your name<br/>
                 Your office
