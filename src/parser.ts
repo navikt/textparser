@@ -1,5 +1,5 @@
 import {createElement, Fragment, ReactElement} from 'react';
-import {AST, ASTNode, RegexMatch, Rule, RuleScope} from './domain';
+import {AST, ASTNode, RegexMatch, Renderer, RendererMap, Rule, RuleScope} from './domain';
 import {flatMap, match, minBy} from './utils';
 
 type NonNullableMatch = { match: RegexMatch; rule: Rule };
@@ -81,16 +81,20 @@ function simplify(node: ASTNode): Array<ASTNode> {
     }
 }
 
-function internalBuild(ast: AST, ruleMap: { [name: string]: Rule }, node: ASTNode, key: number): React.ReactNode {
+function internalBuild(ast: AST, rendererMap: RendererMap, node: ASTNode, key: number): React.ReactNode {
     if (typeof node === 'string') {
         return node;
     }
-    const type = ruleMap[node.name];
-    const element = type.react(node, ast);
+    const renderer = rendererMap[node.name];
+    if (renderer === undefined) {
+        throw new Error('Unknown renderer: ' + node.name);
+    }
+
+    const element = renderer.react(node, ast);
     const children =
         element.children?.length === 0 || node.content.length === 0
             ? undefined
-            : element.children || node.content.map((child, i) => internalBuild(ast, ruleMap, child, i));
+            : element.children || node.content.map((child, i) => internalBuild(ast, rendererMap, child, i));
     return createElement(element.type, {...element.props, key}, children);
 }
 
@@ -98,6 +102,16 @@ function convertRuleFormat(rules: Array<Rule>) {
     const blockRules = rules.filter(rule => rule.scope === RuleScope.BLOCK);
     const inlineRules = rules.filter(rule => rule.scope === RuleScope.INLINE);
     return {blockRules, inlineRules};
+}
+
+function convertRuleToRendererMap(rule: Rule): RendererMap {
+    const map: RendererMap = { [rule.name]: rule };
+    Object.entries(rule.extraRenderers || {})
+        .forEach(([name, react]: [string, Renderer['react']]) => {
+            map[name] = {name, react}
+        })
+
+    return map;
 }
 
 export function parse(content: string, rules: Array<Rule>): AST {
@@ -112,7 +126,9 @@ export function parse(content: string, rules: Array<Rule>): AST {
 }
 
 export function build(ast: AST, rules: Array<Rule>): ReactElement<{}> {
-    const ruleMap = rules.reduce((acc, rule) => ({...acc, [rule.name]: rule}), {});
+    const ruleMap: RendererMap = rules
+        .reduce((acc, rule) => ({ ...acc, ...convertRuleToRendererMap(rule)}), {});
+
     const nodes = ast.map((node, i) => internalBuild(ast, ruleMap, node, i));
     return createElement(Fragment, {}, nodes);
 }
