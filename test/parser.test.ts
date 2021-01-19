@@ -24,6 +24,11 @@ Best regards
 Your name
 Your office
 `.trim();
+const example2 = `
+This is the first paragraph
+
+This is the second paragraph
+`.trim()
 
 const rules: Array<Rule> = [HighlightRule, BoldRule, LinkRule, LinebreakRule, ParagraphRule];
 const whitespace = /\s/g;
@@ -59,6 +64,29 @@ describe('textparser - parse', () => {
     it('should handle empty ruleset', () => {
         const ast = parse(example, []);
         expect(ast).toMatchObject([example]);
+    });
+
+    it('should not recurse block-rules', () => {
+        const customParagraphRule: Rule = {
+            ...ParagraphRule,
+            name: 'custom-paragraph',
+            react(node: string | { name: string; content: AST }): ReactElementDescription {
+                return {type: 'p', props: {className: 'paragraph-class'}}
+            }
+        };
+
+        const customRules = [ParagraphRule, customParagraphRule];
+        const ast = parse(example2, customRules);
+        expect(ast).toMatchObject([
+            {
+                name: 'Paragraph',
+                content: ['This is the first paragraph']
+            },
+            {
+                name: 'Paragraph',
+                content: ['This is the second paragraph']
+            }
+        ]);
     });
 });
 

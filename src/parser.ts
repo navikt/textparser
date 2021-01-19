@@ -39,18 +39,19 @@ function parseMatch(matched: NonNullableMatch, rules: Array<Rule>, recurse: bool
     if (recurse) {
         return nodeParser(
             matchedASTNode,
-            rules.filter(rule => rule !== matched.rule)
+            rules.filter(rule => rule !== matched.rule),
+            recurse
         );
     } else {
         return [matchedASTNode];
     }
 }
 
-function recurseAST(ast: AST, rules: Array<Rule>): AST {
-    return flatMap(ast, child => nodeParser(child, rules));
+function recurseAST(ast: AST, rules: Array<Rule>, recurse: boolean): AST {
+    return flatMap(ast, child => nodeParser(child, rules, recurse));
 }
 
-function nodeParser(node: ASTNode, rules: Array<Rule>, recurse: boolean = true): AST {
+function nodeParser(node: ASTNode, rules: Array<Rule>, recurse: boolean): AST {
     if (typeof node === 'string') {
         const matched = findFirstMatchingRule(node, rules);
         if (!matched) {
@@ -58,7 +59,7 @@ function nodeParser(node: ASTNode, rules: Array<Rule>, recurse: boolean = true):
         }
 
         const surroundingNodes = findSurroundingNodes(node, matched);
-        const [beforeAST, afterAST] = surroundingNodes.map(surroundingNode => recurseAST(surroundingNode, rules));
+        const [beforeAST, afterAST] = surroundingNodes.map(surroundingNode => recurseAST(surroundingNode, rules, recurse));
         const matchedAST = parseMatch(matched, rules, recurse);
 
         return [...beforeAST, ...matchedAST, ...afterAST];
@@ -66,7 +67,7 @@ function nodeParser(node: ASTNode, rules: Array<Rule>, recurse: boolean = true):
         return [
             {
                 name: node.name,
-                content: recurseAST(node.content, rules)
+                content: recurseAST(node.content, rules, recurse)
             }
         ];
     }
@@ -105,7 +106,7 @@ export function parse(content: string, rules: Array<Rule>): AST {
 
     const initalAST: AST = [trimmed];
     const afterBlockRules: AST = flatMap(initalAST, node => nodeParser(node, blockRules, false));
-    const afterInlineRules: AST = flatMap(afterBlockRules, node => nodeParser(node, inlineRules));
+    const afterInlineRules: AST = flatMap(afterBlockRules, node => nodeParser(node, inlineRules, true));
 
     return flatMap(afterInlineRules, simplify);
 }
