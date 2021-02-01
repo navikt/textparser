@@ -22,7 +22,7 @@ export function minBy<T>(fn: (t: T) => number) {
         const accFn = fn(acc);
         const valueFn = fn(value);
 
-        return accFn < valueFn ? acc : value;
+        return accFn <= valueFn ? acc : value;
     };
 }
 

@@ -1,5 +1,5 @@
 import {createElement, Fragment, ReactElement} from 'react';
-import {AST, ASTNode, RegexMatch, Rule, RuleScope} from './domain';
+import {AST, ASTNode, RegexMatch, Renderer, RendererMap, Rule, RuleScope} from './domain';
 import {flatMap, match, minBy} from './utils';
 
 type NonNullableMatch = { match: RegexMatch; rule: Rule };
@@ -39,18 +39,19 @@ function parseMatch(matched: NonNullableMatch, rules: Array<Rule>, recurse: bool
     if (recurse) {
         return nodeParser(
             matchedASTNode,
-            rules.filter(rule => rule !== matched.rule)
+            rules.filter(rule => rule !== matched.rule),
+            recurse
         );
     } else {
         return [matchedASTNode];
     }
 }
 
-function recurseAST(ast: AST, rules: Array<Rule>): AST {
-    return flatMap(ast, child => nodeParser(child, rules));
+function recurseAST(ast: AST, rules: Array<Rule>, recurse: boolean): AST {
+    return flatMap(ast, child => nodeParser(child, rules, recurse));
 }
 
-function nodeParser(node: ASTNode, rules: Array<Rule>, recurse: boolean = true): AST {
+function nodeParser(node: ASTNode, rules: Array<Rule>, recurse: boolean): AST {
     if (typeof node === 'string') {
         const matched = findFirstMatchingRule(node, rules);
         if (!matched) {
@@ -58,7 +59,7 @@ function nodeParser(node: ASTNode, rules: Array<Rule>, recurse: boolean = true):
         }
 
         const surroundingNodes = findSurroundingNodes(node, matched);
-        const [beforeAST, afterAST] = surroundingNodes.map(surroundingNode => recurseAST(surroundingNode, rules));
+        const [beforeAST, afterAST] = surroundingNodes.map(surroundingNode => recurseAST(surroundingNode, rules, recurse));
         const matchedAST = parseMatch(matched, rules, recurse);
 
         return [...beforeAST, ...matchedAST, ...afterAST];
@@ -66,7 +67,7 @@ function nodeParser(node: ASTNode, rules: Array<Rule>, recurse: boolean = true):
         return [
             {
                 name: node.name,
-                content: recurseAST(node.content, rules)
+                content: recurseAST(node.content, rules, recurse)
             }
         ];
     }
@@ -80,16 +81,20 @@ function simplify(node: ASTNode): Array<ASTNode> {
     }
 }
 
-function internalBuild(ast: AST, ruleMap: { [name: string]: Rule }, node: ASTNode, key: number): React.ReactNode {
+function internalBuild(ast: AST, rendererMap: RendererMap, node: ASTNode, key: number): React.ReactNode {
     if (typeof node === 'string') {
         return node;
     }
-    const type = ruleMap[node.name];
-    const element = type.react(node, ast);
+    const renderer = rendererMap[node.name];
+    if (renderer === undefined) {
+        throw new Error('Unknown renderer: ' + node.name);
+    }
+
+    const element = renderer.react(node, ast);
     const children =
         element.children?.length === 0 || node.content.length === 0
             ? undefined
-            : element.children || node.content.map((child, i) => internalBuild(ast, ruleMap, child, i));
+            : element.children || node.content.map((child, i) => internalBuild(ast, rendererMap, child, i));
     return createElement(element.type, {...element.props, key}, children);
 }
 
@@ -99,19 +104,31 @@ function convertRuleFormat(rules: Array<Rule>) {
     return {blockRules, inlineRules};
 }
 
+function convertRuleToRendererMap(rule: Rule): RendererMap {
+    const map: RendererMap = { [rule.name]: rule };
+    Object.entries(rule.extraRenderers || {})
+        .forEach(([name, react]: [string, Renderer['react']]) => {
+            map[name] = {name, react}
+        })
+
+    return map;
+}
+
 export function parse(content: string, rules: Array<Rule>): AST {
     const trimmed = content.trim().replace(/\r/g, '');
     const {blockRules, inlineRules} = convertRuleFormat(rules);
 
     const initalAST: AST = [trimmed];
     const afterBlockRules: AST = flatMap(initalAST, node => nodeParser(node, blockRules, false));
-    const afterInlineRules: AST = flatMap(afterBlockRules, node => nodeParser(node, inlineRules));
+    const afterInlineRules: AST = flatMap(afterBlockRules, node => nodeParser(node, inlineRules, true));
 
     return flatMap(afterInlineRules, simplify);
 }
 
 export function build(ast: AST, rules: Array<Rule>): ReactElement<{}> {
-    const ruleMap = rules.reduce((acc, rule) => ({...acc, [rule.name]: rule}), {});
+    const ruleMap: RendererMap = rules
+        .reduce((acc, rule) => ({ ...acc, ...convertRuleToRendererMap(rule)}), {});
+
     const nodes = ast.map((node, i) => internalBuild(ast, ruleMap, node, i));
     return createElement(Fragment, {}, nodes);
 }

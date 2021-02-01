@@ -14,12 +14,21 @@ export enum RuleScope {
     INLINE
 }
 
-export type Rule = {
+export type Renderer = {
     name: string;
+    react(node: ASTNode, ast: AST): ReactElementDescription;
+}
+export type RendererMap = {
+    [name: string]: Renderer
+}
+
+export type Rule = Renderer & {
     scope: RuleScope;
     regex: RegExp;
     parse(match: RegexMatch): ASTNode;
-    react(node: ASTNode, ast: AST): ReactElementDescription;
+    extraRenderers?: {
+        [key: string]: Renderer['react']
+    };
     [key: string]: any;
 };
 
