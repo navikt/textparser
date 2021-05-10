@@ -118,3 +118,29 @@ export const LinkRule: Rule = {
         };
     }
 };
+
+export const BulletRule: Rule = {
+    name: 'Bullets',
+    scope: RuleScope.BLOCK,
+    regex: /((?:^|\n)(?:\*\s[^\n]+(?:\n+|$))+)/,
+    parse(match: RegexMatch): ASTNode {
+        const content: Array<ASTNode> = match.capture[0]
+            .split('\n')
+            .filter((line) => line.length > 0)
+            .map((line) => line.replace(/^\*\s+/, ''))
+            .map((line) => ({ name: `${this.name}__element`, content: [line] }));
+
+        return {
+            name: this.name,
+            content
+        }
+    },
+    react(node: ASTNode): ReactElementDescription {
+        return { type: 'ul' }
+    },
+    extraRenderers: {
+        'Bullets__element': (node: ASTNode): ReactElementDescription => {
+            return { type: 'li' }
+        }
+    }
+}
