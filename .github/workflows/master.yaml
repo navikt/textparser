@@ -25,6 +25,12 @@ jobs:
         run: npm run test:coverage
       - name: Build
         run: npm run build
+      - name: .npmrc for GPR auth
+        uses: FerLuisxd/create-npmrc@3
+        with:
+          org_name: navikt
+        env:
+          AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Publish
         run: npx semantic-release
         env:
