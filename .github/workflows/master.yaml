@@ -9,7 +9,7 @@ env:
   CI: true
 jobs:
   test-build-publish:
-    if: "!contains(github.event.head_commit.message, '[ci skip]') || contains(github.event.head_commit.message, '[patch]') || contains(github.event.head_commit.message, '[feature]') || contains(github.event.head_commit.message, '[breaking]')"
+    if: "!contains(github.event.head_commit.message, '[ci skip]') || contains(github.event.head_commit.message, '[fix]') || contains(github.event.head_commit.message, '[feat]') || contains(github.event.head_commit.message, '[breaking]')"
     name: Test and build
     runs-on: ubuntu-latest
     env:
@@ -43,10 +43,10 @@ jobs:
           git remote set-url origin https://github-actions[bot]:${{secrets.GITHUB_TOKEN}}@github.com/$GITHUB_REPOSITORY.git
 
       - name: Update changed packages with PATCH
-        if: "contains(github.event.head_commit.message, '[patch]')"
+        if: "contains(github.event.head_commit.message, '[fix]')"
         run: npm run lerna version patch --include-merged-tags --yes
       - name: Update changed packages with MINOR
-        if: "contains(github.event.head_commit.message, '[feature]')"
+        if: "contains(github.event.head_commit.message, '[feat]')"
         run: npm run lerna version minor --include-merged-tags --yes
       - name: Update changed packages with MAJOR
         if: "contains(github.event.head_commit.message, '[breaking]')"
