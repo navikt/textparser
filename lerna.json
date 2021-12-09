@@ -1,0 +1,14 @@
+{
+  "npmClient": "npm",
+  "version": "independent",
+  "command": {
+    "publish": {
+      "registry": "https://registry.npmjs.org/",
+      "message": "Lerna versionbump [ci skip]"
+    },
+    "bootstrap": {
+      "ignore": "*"
+    }
+  },
+  "packages": ["."]
+}
