@@ -44,16 +44,16 @@ jobs:
 
       - name: Update changed packages with PATCH
         if: "contains(github.event.head_commit.message, '[patch]')"
-        run: yarn lerna version patch --include-merged-tags --yes
+        run: npm run lerna version patch --include-merged-tags --yes
       - name: Update changed packages with MINOR
         if: "contains(github.event.head_commit.message, '[feature]')"
-        run: yarn lerna version minor --include-merged-tags --yes
+        run: npm run lerna version minor --include-merged-tags --yes
       - name: Update changed packages with MAJOR
         if: "contains(github.event.head_commit.message, '[breaking]')"
-        run: yarn lerna version major --include-merged-tags --yes
+        run: npm run lerna version major --include-merged-tags --yes
 
       - name: Publish to NPM registry
-        run: yarn lerna publish --no-verify-access from-package --yes
+        run: npm run lerna publish --no-verify-access from-package --yes
 
       - name: Create a .npmrc file for the github package repository
         uses: FerLuisxd/create-npmrc@3
@@ -64,4 +64,4 @@ jobs:
 
       - name: Publish to GPR
         run: |
-          yarn lerna publish --registry https://npm.pkg.github.com from-package --yes
+          npm run lerna publish --registry https://npm.pkg.github.com from-package --yes
