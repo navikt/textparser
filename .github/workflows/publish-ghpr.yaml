@@ -1,0 +1,44 @@
+name: Publish package to GPR
+
+on:
+  release:
+    types:
+      - published
+      - edited
+
+# GITHUB_SHA: last commit in tagget release
+# GITHUB_REF: tag of release
+
+env:
+  CI: true
+jobs:
+  test-build-publish:
+    name: Test and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          ref: ${{ GITHUB_REF }}
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-14-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: actions/setup-node@v2
+        with:
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@navikt'
+          node-version: 14
+      - name: Set version
+        run: npm version ${{ GITHUB_REF }} --allow-same-version --git-tag-version=false
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm run test:coverage
+      - name: Build
+        run: npm run build
+      - name: Publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
