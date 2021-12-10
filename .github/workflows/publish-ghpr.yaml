@@ -1,13 +1,12 @@
 name: Publish package to GPR
 
 on:
-  release:
-    types:
-      - published
-      - edited
-
-# GITHUB_SHA: last commit in tagget release
-# GITHUB_REF: tag of release
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release to publish to GPR'
+        required: true
+        default: 'v1.0.0'
 
 env:
   CI: true
@@ -18,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
         with:
-          ref: ${{ GITHUB_REF }}
+          ref: ${{ github.event.inputs.release }}
       - uses: actions/cache@v1
         with:
           path: ~/.npm
@@ -31,7 +30,7 @@ jobs:
           scope: '@navikt'
           node-version: 14
       - name: Set version
-        run: npm version ${{ GITHUB_REF }} --allow-same-version --git-tag-version=false
+        run: npm version ${{ github.event.inputs.release }} --allow-same-version --git-tag-version=false
       - name: Install dependencies
         run: npm ci
       - name: Test
