@@ -1,9 +1,13 @@
-name: Test, build and publish
+name: Publish package to GPR
 
 on:
-  push:
-    branches:
-      - master
+  release:
+    types:
+      - published
+      - edited
+
+# GITHUB_SHA: last commit in tagget release
+# GITHUB_REF: tag of release
 
 env:
   CI: true
@@ -13,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+        with:
+          ref: ${{ GITHUB_REF }}
       - uses: actions/cache@v1
         with:
           path: ~/.npm
@@ -21,7 +27,11 @@ jobs:
             ${{ runner.os }}-node-
       - uses: actions/setup-node@v2
         with:
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@navikt'
           node-version: 14
+      - name: Set version
+        run: npm version ${{ GITHUB_REF }} --allow-same-version --git-tag-version=false
       - name: Install dependencies
         run: npm ci
       - name: Test
@@ -29,7 +39,6 @@ jobs:
       - name: Build
         run: npm run build
       - name: Publish
-        run: npx semantic-release
+        run: npm publish
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
