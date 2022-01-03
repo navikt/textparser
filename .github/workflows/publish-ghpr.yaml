@@ -12,7 +12,7 @@ env:
   CI: true
 jobs:
   test-build-publish:
-    name: Test and build
+    name: Publish package to GPR
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
