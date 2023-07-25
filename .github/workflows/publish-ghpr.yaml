@@ -20,7 +20,7 @@ jobs:
           ref: ${{ github.event.inputs.release }}
       - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 18
           cache: 'npm'
       - name: Set version
         run: npm version ${{ github.event.inputs.release }} --allow-same-version --git-tag-version=false
