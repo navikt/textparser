@@ -100,7 +100,7 @@ export const BoldRule: Rule = {
 export const LinkRule: Rule = {
     name: 'Link',
     scope: RuleScope.INLINE,
-    regex: /((?:[\w-]+:\/\/?|www(?:-\w+)?\.)[^\s()<>]+\w)/,
+    regex: /((?:[\w-]+:\/\/?|www(?:-\w+)?\.)[^\s()<>]+(?:\.(?!\s))?\w+)/,
     startsWithHttp: /^(https?):\/\/.*$/,
     parse(match: RegexMatch): ASTNode {
         return {

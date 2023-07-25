@@ -233,5 +233,12 @@ describe('rules', () => {
             });
             expect(match(LinkRule.regex, 'data domain.com data')).toBeNull();
         });
+
+        it('should not include the last dot in the url if its followed by a space', () => {
+            expect(match(LinkRule.regex, 'data www.domain.com. data')).toMatchObject({
+                fullmatch: 'www.domain.com',
+                capture: ['www.domain.com']
+            }); 
+        })
     });
 });
