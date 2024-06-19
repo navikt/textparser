@@ -12,12 +12,16 @@ env:
   CI: true
 jobs:
   test-build-publish:
+    permissions:
+      contents: write
+      packages: write
     name: Publish package to GPR
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.release }}
+          registry-url: https://npm.pkg.github.com
       - uses: actions/setup-node@v4
         with:
           node-version: 20
