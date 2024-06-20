@@ -21,11 +21,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.release }}
-          registry-url: https://npm.pkg.github.com
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
+          registry-url: https://npm.pkg.github.com
       - name: Set version
         run: npm version ${{ github.event.inputs.release }} --allow-same-version --git-tag-version=false
       - name: Install dependencies
