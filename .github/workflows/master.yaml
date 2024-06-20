@@ -11,6 +11,7 @@ jobs:
   test-build-publish:
     permissions:
       contents: write
+      packages: write
     name: Test and build
     runs-on: ubuntu-latest
     steps:
