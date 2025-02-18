@@ -4,7 +4,7 @@ import { getText } from './utils';
 export const LinebreakRule: Rule = {
     name: 'Linebreak',
     scope: RuleScope.INLINE,
-    regex:  /\n|\\n/g,
+    regex:  /\n|\\n/,
     parse(match: RegexMatch): ASTNode {
         return {
             name: this.name,

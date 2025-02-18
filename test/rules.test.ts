@@ -33,8 +33,8 @@ describe('rules', () => {
 
         it('should match newline followed by newline', () => {
             expect(LinebreakRule.regex.exec('\n')?.index).toBe(0);
-            expect(LinebreakRule.regex.exec('\n\na\n\n\n')?.index).toBe(1);
-            expect(LinebreakRule.regex.exec('\n\n\n\n\n')?.index).toBe(2);
+            expect(LinebreakRule.regex.exec('\n\na\n\n\n')?.index).toBe(0);
+            expect(LinebreakRule.regex.exec('\n\n\n\n\n')?.index).toBe(0);
         });
     });
 
